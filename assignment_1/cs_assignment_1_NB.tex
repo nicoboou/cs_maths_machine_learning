@@ -1,0 +1,665 @@
+\documentclass{article}
+
+% Language setting
+% Replace `english' with e.g. `spanish' to change the document language
+\usepackage[english]{babel}
+
+% Set page size and margins
+% Replace `letterpaper' with `a4paper' for UK/EU standard size
+\usepackage[a4paper,top=2cm,bottom=2cm,left=3cm,right=3cm,marginparwidth=1.75cm]{geometry}
+
+% Useful packages
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{graphicx}
+\usepackage[colorlinks=true, allcolors=blue]{hyperref}
+
+\title{Assignment n°1 \\ Foundations of Machine Learning}
+\author{Nicolas Bourriez}
+
+\begin{document}
+\maketitle
+
+\section{Probability and statistics}
+
+\subsection{Bayes theorem}
+
+\newline Let's define some random variables to describe our problem:
+\begin{itemize}
+\item $I = Infected$
+\item $S = Safe$
+\item $PT = Positive Test$
+\item $NT = Negative Test$
+\end{itemize}
+\newline and the associated probabilities that we know:
+\begin{itemize}
+\item $P(I) = 1/1000$
+\item $P_S(PT) = 0.01$
+\item $P_S(NT) = 0.99$
+\end{itemize}
+\newline We want to know the probability of a randomly tested person to be \textit{actually} infected if its test is \textit{positive} $P_{PT}(I)$.
+\newline We recall that the Bayes theorem gives us the following equality:
+
+%Bayes Theorem equation
+\begin{equation} \label{eq1}
+P_B(A)=\frac{P(A)P_A(B)}{P(B)} 
+\end{equation}
+
+%Demo
+\newline so we can write
+\[
+P_{PT}(I)=\frac{P(I)P_I(PT)}{P(PT)} 
+\]
+However we notice that
+\[
+\begin{split}
+P(PT) & = P_I(PT)P(I) + P_S(PT)P(S) \\
+ & = 0.95\times0.001 + 0.01\times0.999 \\
+ & = \frac{1}{1000} 
+\end{split}
+\]
+So we write
+\[
+\begin{split}
+P_{PT}{(I)} & = \frac{P(I)P_I(PT)}{0.011} \\
+ & = \frac{0.001\times0.95}{0.011} \\
+ & \simeq \frac{8.6}{1000}
+\end{split}
+\]
+\textbf{CONCLUSION}: we find that the probability of a randomly tested person to be \textit{actually} infected if its test is \textit{positive} is equivalent to:
+\[
+\boxed{
+ & \simeq \frac{8.6}{1000}
+}
+\]
+
+\subsection{Maximum Likelihood Estimator}
+\subsubsection{Log-likelihood of the data}
+Given the N independent and identically distributed $(i.i.d)$ samples $\mathbf{x} = {x_1,x_2,...,x_N}$, we can write the \textit{likelihood} of the data as
+
+\begin{equation} \label{eq2}
+p(\mathbf{x}|\theta)=\mathcal{L}_{\theta}(\mathbf{x})=\prod\limits_{i=1}^{n}p(x_i|\theta) \quad\quad\quad (i.i.d)
+\end{equation}
+
+Using the natural logarithm $\ln$, we thus write
+\[
+\begin{split}
+l(\theta) = \ln(\mathcal{L}_{\theta}) & = \ln(\prod\limits_{i=1}^{n}p(x_i|\theta)) \\
+& = \sum\limits_{i=1}^{n}\ln(p(x_i|\theta)) \\
+& = \sum\limits_{i=1}^{n}\ln(\frac{1}{\sqrt{2\pi\sigma^2}}e^{-\frac{1}{2}\frac{(x_i-\theta)^2}{\sigma^2}}) \quad\quad\quad (w.r.t \quad \mu)
+\end{split}
+\]
+We thus have the following equation using properties of $\ln$
+\[
+\begin{split}
+l(\theta) & = \sum\limits_{i=1}^{n}{(-\ln\sqrt{2\pi\sigma^2} + \ln e^{-\frac{1}{2}\frac{(x_i-\theta)^2}{\sigma^2}})} \\
+& = - \frac{1}{2\sigma^2}\sum\limits_{i=1}^{n}(x_i-\theta)^2-\sum\limits_{i=1}^{n}\frac{\ln(2\pi\sigma^2)}{2}
+\end{split}
+\]
+
+\textbf{CONCLUSION}:
+\begin{equation} \label{eq3}
+\boxed{
+l(\theta) = - \frac{1}{2\sigma^2}\sum\limits_{i=1}^{n}(x_i-\theta)^2-\frac{n}{2}\ln(2\pi\sigma^2)
+}
+\end{equation}
+
+\subsubsection{Maximum Likelihood Estimator of $\mu$}
+
+We define $\hat{\theta}({\mathbf{x}})$ as the Maximum Likelihood Estimator of $\mu$. It is thus the maximum argument of the likelihood $\mathcal{L}_{\theta}(\mathbf{x})$, which means that we want to take the likelihood for which the parameters $\theta$ provide the "highest" probabilities.
+\[
+\hat{\theta}({\mathbf{x}}) = \underset{\theta}{argmax}\quad{\mathcal{L}_\theta(\mathbf{x})}
+\]
+Since we want to maximize our probability, we want to reach an extremum, and thus we can use the derivative of our \textit{log-likelihood} by setting it to 0:
+\[
+\hat{\theta}= \underset{\theta}{argmax}\quad l(\theta) \longrightarrow \frac{\partial l}{\partial \theta} = 0 \quad\quad\quad (w.r.t \quad \mu)
+\]
+We thus first compute the partial derivative of l  w.r.t $\theta$, which can be written as being proportional to an easier expression from .Equation (3)
+\[
+\begin{split}
+\frac{\partial l(\theta)}{\partial \theta} & = \frac{\partial l}{\partial \theta}\left[- \frac{1}{2\sigma^2}\sum\limits_{i=1}^{n}(x_i-\theta)^2-\frac{n}{2}\ln(2\pi\sigma^2))\right] \\
+\frac{\partial l(\theta)}{\partial \theta} & \propto \sum\limits_i{(\theta-x_i)} \\
+& \propto n\theta - \sum\limits_i{x_i}
+\end{split}
+\]
+Thus we can write:
+\[
+\begin{split}
+\frac{\partial l}{\partial \theta} = 0 & \iff n\theta - \sum\limits_i{x_i} = 0 \\
+& \iff \theta = \frac{1}{n}\sum\limits_{i}x_i
+\end{split}
+\]
+
+\textbf{CONCLUSION}: We find that the Maximum Likelihood Estimator of $\mu$ is equal to the mean $\overline{X}_n$
+\begin{equation} \label{eq3}
+\boxed{
+\hat{\theta} = \underset{\theta}{argmax}l(\theta) = - \frac{1}{n}\sum\limits_{i}x_i
+}
+\end{equation}
+
+\subsubsection{Maximum Likelihood Estimator of $\sigma^2$}
+
+We define $\hat{\theta}({\mathbf{x}})$ as the Maximum Likelihood Estimator of $\sigma^2$.
+\newline Similarly to 1.2.2, we can write the log-likelihood of $\theta$ with respect to $\sigma^2$:
+\[
+\begin{split}
+l(\theta) & = \sum\limits_{i=1}^{n}\ln(\frac{1}{\sqrt{2\pi\theta}}e^{-\frac{1}{2}\frac{(x_i-\mu)^2}{\theta}}) \quad\quad\quad (w.r.t \quad \sigma^2) \\
+& = - \frac{1}{2\theta}\sum\limits_{i=1}^{n}(x_i-\mu)^2-\frac{n}{2}\ln(2\pi\theta)
+\end{split}
+\]
+Same as for the MLE of $\mu$, here we want to find the right $\sigma^2$ that will maximize the likelihood $\mathcal{L}_\theta(\mathbf{x})$.
+\newline We thus have:
+\[
+\hat{\theta}= \underset{\theta}{argmax}\quad l(\theta) \longrightarrow \frac{\partial l}{\partial \theta} = 0 \quad\quad\quad (w.r.t \quad \sigma^2)
+\]
+Computing the partial derivative of l, we get:
+
+\[
+\begin{split}
+\frac{\partial l}{\partial \theta} & = \frac{\left[ -\sum\limits_{i=1}^{n}(x_i -\mu)^2\right]'2\theta - \left[ -\sum\limits_{i=1}^{n}(x_i -\mu)^2\right](2\theta)'}{(2\theta)^2} - \left[(\frac{n}{2})'\ln(2\pi\theta) + \frac{n}{2}\ln(2\pi\theta)'\right] \\
+& = \frac{\sum\limits_{i=1}^{n}(x_i-\mu)^2}{2\theta^2}-\frac{n}{2\theta} \\
+& = \frac{\sum\limits_{i=1}^{n}(x_i-\mu)^2 - n\theta}{2\theta^2} \quad\quad\quad (\theta \neq  0)
+\end{split}
+\]
+We pose 
+\[
+\hat{\theta}= \underset{\theta}{argmax}\quad l(\theta) \longrightarrow \frac{\partial l}{\partial \theta} = 0 \quad\quad\quad (w.r.t \quad \sigma^2)
+\]
+And thus we can then compute the MLE of $\sigma^2$ which gives:
+
+\[
+\begin{split}
+\hat{\theta} = \underset{\theta}{argmax}l(\theta) & \longrightarrow \frac{\sum\limits_{i=1}^{n}(x_i-\mu)^2-n\theta}{2\theta} = 0  \\
+& \longrightarrow \sum\limits_{i=1}^{n}(x_i-\mu)^2-n\theta = 0 \\
+& \longrightarrow \theta = \frac{1}{n}\sum\limits_{i = 1}^{n}(x_i-\mu)^2
+\end{split}
+\]
+
+\textbf{CONCLUSION}: We find that the Maximum Likelihood Estimator of $\sigma^2$ is equal to :
+\begin{equation} \label{eq3}
+\boxed{
+\hat{\theta} = \underset{\theta}{argmax}l(\theta) = \frac{1}{n}\sum\limits_{i}(x_i-\mu)^2
+}
+\end{equation}
+
+\subsubsection{Bonus question}
+
+We recall that an unbiased estimator $\hat{\theta}$ is equal to $\mathbb{E}(\hat{\theta})=\theta$.
+\newline We want to show that the Maximum Likelihood Estimator of $\sigma^2$ is \textbf{biased}.
+\newline From .Equation (5), we already have the following expression:
+
+\[
+\hat{\theta} = \frac{1}{n}\sum\limits_{i=1}^{n}(x_i - \mu)^2
+\]
+
+Moreover since we recall from .Equation (4) that $\hat{\theta}$ with respect to $\mu$ is the \textit{\textbf{mean}} $\overline{X}_n$, we can write:
+
+\[
+\begin{split}
+\hat{\theta} & = \frac{1}{n}\sum\limits_{i=1}^{n}(X_i - 2X_i\overline{X}_n+\overline{X}_n^2) \\
+& = \frac{1}{n}(\sum\limits_{i=1}^{n}X_i^2 - 2\overline{X}_n\sum\limits_{i=1}^{n}X_i+\sum\limits_{i=1}^{n}\overline{X}_n^2) \\
+& = \frac{1}{n}(\sum\limits_{i=1}^{n}X_i^2 - 2n\overline{X}_n^2+n\overline{X}_n^2) \quad\quad\quad (n\overline{X_n} = \sum\limits_{i=1}^{n}X_i)
+\end{split}
+\]
+Using the expression we just found, and using the linearity of the Expected Value, we get:
+\[
+\mathbb{E}(\hat{\theta})=\frac{1}{n}\sum\limits_{i=1}^{n}\mathbb{E}(X_i^2)-\mathbb{E}(\overline{X}_n^2)
+\]
+
+Let's look further into each element of $\mathbb{E}(\hat{\theta})$:
+\begin{itemize}
+\item \textbf{$\mathbb{E}(X_i^2)$} ? \\
+\newline We know that 
+\[
+\begin{split}
+\sigma^2 & = \mathbb{V}(X_i) = \mathbb{E}((X_i - \mathbb{E}(X_i)^2) \\
+& = \mathbb{E}(X_i^2)- \mathbb{E}(X_i)^2
+\end{split}
+\]
+Thus we end having:
+\[
+\mathbb{E}(X_i^2) = \sigma^2 + \mu^2
+\]
+And similarly
+\[
+\mathbb{E}(\overline{X}_n) = \mu
+\]
+\item \textbf{$\mathbb{E}(\overline{X}_n^2)$} ? \\
+\newline We know that:
+\[
+\begin{split}
+\mathbb{V}(\overline{X}_n) & = \frac{1}{n^2}\sum\limits_{i=1}^{n}\mathbb{V}(X_i) \\
+& = \frac{1}{n^2}\sum\limits_{i=1}^{n}\sigma^2 \\
+& = \frac{1}{n^2}\timesn\sigma^2 \\
+& = \frac{\sigma^2}{n}
+\end{split}
+\]
+We can now compute $\mathbb{E}(\overline{X}_n^2)$:
+
+\[
+\begin{split}
+\mathbb{E}(\overline{X}_n^2) & = \mathbb{V}(\overline{X}_n) + (\mathbb{E}(\overline{X}_n))^2 \\
+& = \frac{\sigma^2}{n} + \mu^2
+\end{split}
+\]
+\end{itemize}
+\newline Aggregating the two expressions we got, we can now formulate $\mathbb{E}(\hat{\theta})$:
+\[
+\begin{split}
+\mathbb{E}(\hat{\theta}) & =\frac{1}{n}\sum\limits_{i=1}^{n}\mathbb{E}(X_i^2)-\mathbb{E}(\overline{X}_n^2) \\
+& = \frac{1}{n}\sum\limits_{i=1}^{n}(\sigma^2+\mu^2)-\frac{\sigma^2}{n}+\mu^2 \\
+& = \frac{1}{n}\times n(\sigma^2+\mu^2) - \frac{\sigma^2}{n} - \mu^2 \\
+& = \sigma^2 + \mu^2 + \frac{\sigma^2}{n} - \mu^2 \\
+& = \frac{n-1}{n}\sigma^2
+\end{split}
+\]
+
+\textbf{CONCLUSION}:$\mathbb{E}(\hat{\theta})$ is a \textit{\textbf{biased}} estimator of $\sigma^2$ since $\mathbb{E}(\hat{\theta}) \neq \sigma^2$ , and its bias is equal to :
+\[
+\begin{split}
+b & = \mathbb{E}(\hat{\theta}) -  \theta \\
+& = \frac{n-1}{n}\sigma^2-\sigma^2
+\end{split}
+\]
+
+\begin{equation} \label{eq3}
+\boxed{
+b = -\frac{\sigma^2}{n}
+}
+\end{equation}
+
+\section{Linear Regression}
+\subsection{Parameters of a linear regression}
+\subsubsection{Derivative of w}
+We have $\mathbf{w} = (w_1,w_2)^T = \begin{pmatrix}w_1\\w_2\end{pmatrix}$ so $\hat{y}_n=w_1x_{1,n}+w_2x_{2,n}$
+\newline We know from the exercise details that our loss function that we want to derive is the following:
+\[
+J(\mathbf{w}) = \frac{1}{N}\sum\limits_{n=1}^{N}(y_n-\hat{y}_n)^2
+\]
+\newline We now compute the partial derivatives of J:
+\begin{itemize}
+\item $\frac{\partial J(\mathbf{w})}{\partial w_1}$
+\[
+\begin{split}
+\frac{\partial J(\mathbf{w})}{\partial w_1} & = \frac{1}{N}\sum\limits_{n=1}^{N}\frac{\partial}{\partial w_1}(y_n-\hat{y}_n)^2 \\
+\end{split}
+\]
+Focusing only on the term $\frac{\partial}{\partial w_1}(y_n-\hat{y}_n)^2$:
+\[
+\begin{split}
+\frac{\partial}{\partial w_1}(y_n-\hat{y}_n)^2 & = (2y_n-\hat{y}_n)\frac{\partial}{\partial w_1}(y_n-\hat{y}_n) \quad\quad\quad (chain \quad rule) \\
+& = (2y_n-\hat{y}_n)\times (-x_{1,n}) \quad\quad\quad (-x_{1,n} = \frac{\partial}{\partial w_1}(y_n-w_1x_{1,n}-w_2x_{2,n})
+\end{split}
+\]
+We end up with the following expression:
+\[
+\begin{split}
+\frac{\partial J(\mathbf{w})}{\partial w_1} & = \frac{2}{N}\sum\limits_{n=1}^{N}(y_n-w_1x_{1,n}-w_2x_{2,n})\times -x_{1,n} \\
+& = \frac{2}{N}(w_1\sum\limits_{n=1}^{N}x_{1,n}^2+w_2\sum\limits_{n=1}^{N}x_{1,n}x_{2,n}-\sum\limits_{n=1}^{N}x_{1,n}y_{n})
+\end{split}
+\]
+\item $\frac{\partial J(\mathbf{w})}{\partial w_2}$
+Similarly, we get:
+\[
+\begin{split}
+\frac{\partial J(\mathbf{w})}{\partial w_1} & = \frac{2}{N}\sum\limits_{n=1}^{N}(y_n-w_1x_{1,n}-w_2x_{2,n})\times -x_{2,n} \\
+& = \frac{2}{N}(w_1\sum\limits_{n=1}^{N}x_{2,n}^2+w_2\sum\limits_{n=1}^{N}x_{1,n}x_{2,n}-\sum\limits_{n=1}^{N}x_{2,n}y_{n})
+\end{split}
+\]
+\end{itemize}
+\newline To simplify the notation, we can write the following terms as so:
+\begin{itemize}
+\item $t_1 = \sum_{n=1}^{N}x_{1,n}^2$ 
+\item $t_2 = \sum_{n=1}^{N}x_{2,n}^2$
+\item $s = \sum_{n=1}^{N}x_{1,n}x_{2,n}$
+\item $v_1 = \sum_{n=1}^{N}x_{1,n}y_n$
+\item $v_2 = \sum_{n=1}^{N}x_{2,n}y_n$
+\end{itemize}
+And get
+\[
+\begin{split}
+\frac{\partial J(\mathbf{w})}{\partial \mathbf{w}} = 0 & \Longleftrightarrow \begin{cases}
+\frac{\partial J(\mathbf{w})}{\partial w_1} = 0 \\
+\frac{\partial J(\mathbf{w})}{\partial w_2} = 0 
+\end{cases} \\
+& \Longleftrightarrow
+\begin{cases}
+w_1 = \frac{t_2v_1-sv_2}{t_1t_2-s^2} \\
+w_2 = \frac{t_1v_2-sv_2}{t_1t_2-s^2}
+\end{cases}
+\end{split}
+\]
+
+\textbf{CONCLUSION}: The derivative of $\mathbf{w}$ when set to 0 is equal to :
+
+\begin{equation} \label{eq3}
+\boxed{
+\frac{\partial J(\mathbf{w})}{\partial \mathbf{w}} = 0 \Longleftrightarrow
+\begin{cases}
+w_1 = \frac{t_2v_1-sv_2}{t_1t_2-s^2} \\
+w_2 = \frac{t_1v_2-sv_2}{t_1t_2-s^2}
+\end{cases}
+}
+\end{equation}
+\subsubsection{Compatibility with closed-form solution}
+Since we are in dimension 2, we can see that $\mathbf{X} = (\sum\limits_{n=1}^{N}x_{1,n} \sum\limits_{n=1}^{N}x_{2,n})$ and thus we get:
+
+\[
+\mathbf{X^TX} = \begin{pmatrix}\sum\limits_{n=1}^{N}x_{1,n}^2&\sum\limits_{n=1}^{N}x_{1,n}x_{1,n}\\ 
+\sum\limits_{n=1}^{N}x_{1,n}x_{1,n}&\sum\limits_{n=1}^{N}x_{2,n}^2
+\end{pmatrix} 
+\]
+Using the formula to compute the inverse of a matrix, we can find:
+\[
+\mathbf{X^TX}^{-1} = \frac{1}{t_1t_2-s^2}
+\begin{pmatrix}t_2&-s\\-s&t_1
+\end{pmatrix} 
+\]
+\textbf{CONCLUSION}: Multiplying by $\mathbf{X^Ty}$, we end up with the following equation:
+
+\begin{equation} \label{eq4}
+\boxed{
+\mathbf{w} = (\mathbf{X^TX})^{-1}\mathbf{X^Ty}=\frac{1}{t_1t_2-s^2}
+\begin{pmatrix}t_2v_1-sv_2\\t_1v_2-cv_1
+\end{pmatrix}
+}
+\end{equation}
+which appear coherent
+
+\subsection{Least Square Loss}
+
+\subsubsection{Log-likelihood of the observations}
+\begin{itemize}
+\item \textbf{Likelihood}
+\newline We know that $D = {(x_1,y_1),...,(x_n,y_n)}$, thus we can write the likelihood of $D$ given a set of parameters $\theta = (w, \sigma^2)$ as
+\[
+p(D|\theta) = \prod\limits_{n=1}^Np(x_n,y_n|w,\sigma^2) \quad\quad\quad (i.i.d)
+\]
+We recall that $p(a,b) = p(a|b)p(b)$, hence
+\[
+p(D|\theta) = \prod\limits_{n=1}^Np(x_n|y_n,w,\sigma^2)p(y_n,w,\sigma^2)
+\]
+But we also recall according to the compound probability theorem that
+\[
+p(A\cap B) = p(A|B)p(B) = p(B|A)p(A)
+\]
+We can thus write the likelihood as so:
+\[
+p(D|\theta) = \prod\limits_{n=1}^Np(y_n|x_n,w,\sigma^2)p(x_n,w,\sigma^2)
+\]
+\item\textbf{ Log-likelihood}
+\newline We wish to write the log-likelihood of our observations D as a function of $w$.
+\newline Using the natural log:
+\[
+\begin{split}
+l(w) & = \ln\left[ \prod\limits_{n=1}^Np(y_n|x_n,w,\sigma^2)p(x_n,w,\sigma^2) \right] \\
+& = \sum\limits_{i=1}^{N}\left[\ln(p(y_n|x_n,w,\sigma^2))+\ln(p(x_n|w,\sigma^2))\right]
+\end{split}
+\]
+Analysing each term of the sum:
+\begin{itemize}
+\item $\sum\limits_{i=1}^{N}\ln(p(x_n|w,\sigma^2)) = \sum\limits_{i=1}^{N}\ln[\frac{1}{\sqrt{2\pi\sigma^2}}e^{(-\frac{(x_n-w)^2}{2\sigma^2})}] = -N\ln(\sqrt{2\pi\sigma^2})-\frac{1}{\sigma^2}\frac{1}{2}\sum\limits_{n=1}^{N}(x_n-w)^2$
+\item $\sum\limits_{i=1}^{N}\ln(p(y_n|x_n,w,\sigma^2)) = 
+\sum\limits_{i=1}^{N}\ln[\frac{1}{\sqrt{2\pi\sigma^2}}e^{(-\frac{(y_n -w^Tx_n)^2}{2\sigma^2})}] = -N\ln(\sqrt{2\pi\sigma^2})-\frac{1}{\sigma^2}\frac{1}{2}\sum\limits_{n=1}^{N}(y_n -w^Tx_n)^2$
+\end{itemize}
+\end{itemize}
+
+\textbf{CONCLUSION}:
+
+\begin{equation} \label{eq4}
+\boxed{
+l(w) = -2N\ln(\sqrt(2\pi\sigma^2)-\frac{1}{2\sigma^2}\sum\limits_{n=1}^{N}(x_n-w)^2-\frac{1}{2\sigma^2}\sum\limits_{n=1}^{N}(y_n-w^Tx_n)^2
+}
+\end{equation}
+
+\subsubsection{Maximization of log-likelihood}
+We notice first that due to \textbf{monotony} of $\ln$, we have:
+\[
+\underset{w}{argmax}\quad p(D|w,\sigma^2) \Longrightarrow \underset{w}{argmax} \ln(p(D|w,\sigma^2))
+\]
+Since we want to maximize our log-likelihood with respect to ${w}$, we can set:
+\[
+\hat{w} = \underset{w}{argmax}\quad l(w) \Longrightarrow \frac{\partial l(w)}{\partial w} = 0
+\]
+Computing the partial derivative of $l(w)$:
+\[
+\frac{\partial l(w)}{\partial w} = \frac{\partial}{\partial w}\left[ -2N\ln(\sqrt(2\pi\sigma^2)-\frac{1}{2\sigma^2}\sum\limits_{n=1}^{N}(x_n-w)^2-\frac{1}{2\sigma^2}\sum\limits_{n=1}^{N}(y_n-w^Tx_n)^2\right]
+\]
+\begin{itemize}
+\item $-2N\ln(\sqrt(2\pi\sigma^2)$ is a constant, so its derivative is equal to 0
+\item $\frac{\partial}{\partial w}\left[-\frac{1}{2\sigma^2}\sum\limits_{n=1}^{N}(x_n-w)^2\right] \propto Nw - \sum\limits_{n}x_n$ (from Exercise 1.2.2)
+\end{itemize}
+We arrive then to the following expression:
+\[
+\begin{split}
+\frac{\partial l(w)}{\partial w} = 0 & \Longleftrightarrow Nw - \sum\limits_{n}x_n - \frac{\partial}{\partial w}\left[\frac{1}{2\sigma^2}\sum\limits_{n=1}^{N}(y_n-w^Tx_n)^2\right] \\
+& \Longleftrightarrow N\left[w-\frac{1}{N}\sum\limits_{n}x_n-\frac{\partial}{\partial w}\left[\frac{1}{2\sigma^2}\frac{1}{N}\sum\limits_{n}(y_n-w^Tx_n)^2\right]\right]
+\end{split}
+\]
+\textbf{CONCLUSION}: We recognize that to \textit{maximize} our log-likelihood, we have to \textit{minimize} the following term, which is the sum of the squared errors:
+
+\begin{equation} \label{eq4}
+\boxed{
+\frac{1}{N}\sum\limits_{n}(y_n-w^Tx_n)^2
+}
+\end{equation}
+
+
+\section{Logistic Regression}
+\subsection{Link between odd ratio and sigmoid function}
+As per its definition, a \textit{sigmoid function} is represented as follows
+\[
+\sigma :x \mapsto \frac{1}{1 + e^{-x}}
+\]
+We want to prove that using a linear model $\mathbf{w^Tx}$,
+\[
+\sigma(\mathbf{w^Tx})=\frac{1}{1 + e^{-\mathbf{w^Tx}}} \Longleftrightarrow \mathbf{w^Tx} \sim \log(\frac{p(y=1)}{p(y=0)})
+\]
+Starting from the right-hand side of the equivalence and applying the exp on the natural logarithm, we have:
+\[
+\begin{split}
+& \Longleftrightarrow e^{\mathbf{w^Tx}} \sim \frac{p(y=1)}{p(y=0)}\\
+& \Longleftrightarrow \frac{1}{e^{\mathbf{w^Tx}}} \sim \frac{p(y=0)}{p(y=1)} \\
+& \Longleftrightarrow 1 + \frac{1}{e^{\mathbf{w^Tx}}}\sim 1 + \frac{p(y=0)}{p(y=1)} \\
+& \Longleftrightarrow 1 + e^{(-\mathbf{w^Tx})} \sim \frac{p(y=1)+p(y=0)}{p(y=1)} \\
+& \Longleftrightarrow \frac{1}{1 + e^{\mathbf{-w^Tx}}} \sim \frac{p(y=1)}{p(y=1) + p(y=0)}
+\end{split}
+\]
+
+\textbf{CONCLUSION}: We observe that predicting the log of the odd ratio with a linear model is equivalent to predicting the proba of \textit{winning} by applying a sigmoid function to the output of a linear model, which translates to:
+
+\begin{equation} \label{eq4}
+\boxed{
+\frac{1}{1 + e^{\mathbf{w^Tx}}} \sim \frac{p(y=1)}{p(y=1) + p(y=0)}
+}
+\end{equation}
+
+\subsection{Link between maximization of log-likelihood and logistic regression model}
+Given a set of observations $D = \{ (x_1,y_1),...,(x_n,y_n) \}$, we can write the likelihood of this set as
+\[
+p(D) = \prod\limits_{n=1}^{N}p(x_n,y_n) \quad\quad\quad (i.i.d)
+\]
+We recall that $p(a,b) = p(a|b)p(b)=p(b|a)p(a)$, hence
+\[
+p(D) = \prod\limits_{n=1}^Np(y_n|x_n)p(x_n)
+\]
+Observing the odd ratio, we also recognize that the probability mass function of the random variable X is the one of a Bernoulli variable:
+\[
+P(X=x) = 
+\begin{cases}
+p \quad if \quad x = 1 \\
+1-p \quad if \quad x = 0 \\
+0 \quad otherwise
+\end{cases} \\
+\]
+which also translate into the following expression:
+\[
+\begin{split}
+P(X=x) & = p^x(1-p)^{(1-x)}, \quad x \in \left{0,1\right} \\
+& = e^{x\ln p}e^{(1-p)\ln(1-x)} \quad\quad\quad (a^n=e^{n\ln(a)})
+\end{split}
+\]
+\newline From .Equation (11), we have 
+\[
+P(Y=1)=\frac{1}{1+e^{-\mathbf{w^Tx}}}
+\]
+Using the probability distribution we observed previously, we get
+\[
+P(Y=y) = 
+\begin{cases}
+\frac{1}{1+e^{-\mathbf{w^Tx}}} \quad if \quad y = 1 \\
+1 - \frac{1}{1+e^{-\mathbf{w^Tx}}} \quad if \quad y = 0 \\
+0 \quad otherwise
+\end{cases} \\
+\]
+\textbf{Partial conclusion:} the PMF of $y$ \textit{\textbf{depends}} on $\mathbf{w}$.
+\newline
+\newline We now apply the natural logarithm to get the \textit{log-likelihood} of the set of observations $D$:
+\[
+\begin{split}
+\ln(p(D)) & = \ln\prod\limits_{n=1}^{N}p(y_n|x_n)p(x_n) \\
+\ln(p(D)) & = \sum\limits_{n=1}^{N}\ln(p(y_n|x_n))+ \sum\limits_{n=1}^{N}\ln(p(x_n)) 
+\end{split}
+\]
+If we decompose each term of our expression, we then have
+\begin{itemize}
+    \item For $\sum\limits_{n=1}^{N}\ln(p(y_n|x_n))$
+    \[
+    \begin{split}
+        \sum\limits_{n=1}^{N}\ln(p(y_n|x_n)) & = \sum\limits_{n=1}^{N}\ln(e^{y_n\ln x_n}e^{(1-x_n)\ln(1-y_n)}) \\
+        & = \sum\limits_{n=1}^{N}\left[ y_n\ln x_n + (1-x_n)\ln(1-y_n)\right]
+    \end{split}
+    \]
+    \item For $\sum\limits_{n=1}^{N}\ln(p(x_n))$, similarly we get
+    \[
+    \begin{split}
+        \sum\limits_{n=1}^{N}\ln(p(x_n)) & = \sum\limits_{n=1}^{N}\ln(p(x_n|p)) \\
+        & = \sum\limits_{n=1}^{N}\ln(e^{x_n\ln p}e^{(1-x_n)\ln(1-p)}) \\
+        & = \sum\limits_{n=1}^{N}\left[x_n\ln p + (1-p)\ln(1-x_n)\right]
+    \end{split}
+    \]
+    \newline We can recall that maximizing the \textit{log-likelihood} of $p(D)$ gives us the following expression:
+    \[
+    \underset{w}{argmax}\quad \ln(p((D)) \Longrightarrow \frac{\partial \ln(p((D))}{\partial w} = 0
+    \]
+    with the partial derivative of the \textit{log-likelihood} being 
+    
+    \begin{multline*}
+    \frac{\partial \ln(p((D))}{\partial w} = \frac{\partial}{\partial w}\left[\sum\limits_{n=1}^{N}y_n\ln x_n (1-x_n)\ln(1-y_n)\right] \\ + \\ \frac{\partial}{\partial w}\left[\sum\limits_{n=1}^{N}x_n\ln p + (1-p)\ln(1-x_n)\right] \quad (\lambda f + \mu g)'=\lambda f' + \mu g')
+    \end{multline*}
+    
+    \newline But we remember that only the PMF of $y$ depends on $\mathbf{w}$, so we deduct that the partial derivative $\frac{\partial}{\partial \mathbf{w}}$ of $\sum\limits_{n=1}^{N}\ln(p(x_n))$ is a \textbf{\textit{constant}}.
+
+
+\textbf{CONCLUSION}: We then recognize that we have a logistic regression model and its corresponding \textit{training loss} by minimizing the following expression:
+
+\begin{equation} \label{eq4}
+\boxed{
+J(\mathbf{w}) = - \sum\limits_{n=1}^{N}\left[y_n\ln x_n (1-x_n)\ln(1-y_n)\right] = - \sum\limits_{n=1}^{N}\ln(p(y_n|x_n))
+}
+\end{equation}
+ 
+\end{itemize}
+
+\section{Clustering}
+\subsection{K-Means}
+\begin{align}
+If \quad a_{n,k} \in k, then \quad a_{n,k} & = 1 \\
+else \quad a_{n,k} & = 0
+\end{align}
+
+Since we want to minimize the inertia, we want that:
+\[
+\frac{\partial J(c_k)}{\partial c_k} = 0
+\]
+Writing the partial derivative of $J(c_k)$:
+\[
+\begin{split}
+\frac{\partial J(c_k)}{\partial c_k} & = \frac{1}{N}\frac{\partial }{\partial c_k}\left[\sum\limits_{n=1}^{N}\sum\limits_{k=1}^{N}a_{n,k}\parallel \mathbf{x}_n - \mathbf{c}_k \parallel_2 ^2\right]\\
+& = \frac{1}{N}\frac{\partial }{\partial c_k}\left[\sum\limits_{n=1}^{N}\sum\limits_{k=1}^{N}a_{n,k}(\mathbf{x}_n - \mathbf{c}_k)^T(\mathbf{x}_n - \mathbf{c}_k)\right] \\
+& = \frac{1}{N}\frac{\partial }{\partial c_k}\left[\sum\limits_{n=1}^{N}\sum\limits_{k=1}^{N}a_{n,k}(\mathbf{x}_n^T\mathbf{x}_n - \mathbf{x}_n^T\mathbf{c}_k - \mathbf{c}_k^T\mathbf{x}_n + \mathbf{c}_k^T\mathbf{c}_k)\right] \\
+& = \frac{1}{N}\sum\limits_{n=1}^{N}a_{n,k}\frac{\partial }{\partial c_k}(\mathbf{x}_n^T\mathbf{x}_n - \mathbf{x}_n^T\mathbf{c}_k - \mathbf{c}_k^T\mathbf{x}_n + \mathbf{c}_k^T\mathbf{c}_k) \quad\quad\quad (Eq.(14): a_{n,k} \notin k \rightarrow a_{n,k} = 0) \\
+\end{split}
+\]
+Because $(uv)'=(u'v + uv')$ and $\frac{\partial(x^Ta)}{\partial a} = \frac{\partial(a^Tx)}{\partial a} = a$, we thus get:
+\[
+\frac{\partial J(c_k)}{\partial c_k} = \frac{1}{N}\sum\limits_{n=1}^{N}a_{n,k}(-2\mathbf{x}_n +2\mathbf{c}_k)
+\]
+We can now compute:
+\[
+\begin{split}
+\frac{\partial J(c_k)}{\partial c_k} = 0 & \Longleftrightarrow \frac{1}{N}\sum\limits_{n=1}^{N}a_{n,k}(-2\mathbf{x}_n +2\mathbf{c}_k) = 0\\
+& \Longleftrightarrow \frac{2}{N}\sum\limits_{n=1}^{N}(-a_{n,k}\mathbf{x}_n +a_{n,k}\mathbf{c}_k) = 0 \\
+& \Longleftrightarrow \frac{2}{N}\left[\sum\limits_{n=1}^{N}a_{n,k}\mathbf{c}_k-\sum\limits_{n=1}^{N}a_{n,k}\mathbf{x}_n\right]  = 0 \\
+& \Longleftrightarrow \mathbf{c}_k = \frac{\sum\limits_{n=1}^{N}a_{n,k}\mathbf{x}_n}{\sum\limits_{n=1}^{N}a_{n,k}}
+\end{split}
+\]
+
+\textbf{CONCLUSION}: When minimizing $J$, cluster centers ${c_1,...,c_K}$ are the means of the points assigned to the respective clusters as described by:
+
+\begin{equation} \label{eq4}
+\boxed{
+\frac{\partial J(c_k)}{\partial c_k} = 0 \Longleftrightarrow \mathbf{c}_k = \frac{\sum\limits_{n=1}^{N}a_{n,k}\mathbf{x}_n}{\sum\limits_{n=1}^{N}a_{n,k}}
+}
+\end{equation}
+
+\subsection{Hierarchical clustering and Levensthein distance}
+We want to show that the Levensthein distance is indeed a \textit{distance}, using the mathematical definition of the term.
+\newline
+\newline \textbf{Reasoning by the absurd}
+\newline If the Levenshtein distance was \textit{\textbf{not}} a general distance, thus according to the mathematical definition:
+
+\[
+\begin{cases}
+\forall (a,b) \in E^2, d(a,b) \neq d(b,a) \\
+\forall (a,b) \in E^2, d(a,b) = 0 \not\equiv  a=b \\
+\forall (a,b,c), (d(a,c) > d(a,b) + d(b,c)
+\end{cases}
+\]
+\newline
+\textit{Is the Levenshtein distance respecting these criterion, and thus \textit{\textbf{is not}} a general distance ?}
+\newline
+\begin{itemize}
+    \item \textbf{Symmetry}
+    \newline Given two strings of characters $a="machine"$ and $b="learning"$ with $(a,b) \in E^2, E={a,b,...,z}$ and $d$ the Levenshtein distance:
+    \[
+    \begin{cases}
+    d(a,b)=d("machine","learning") = 5 \quad\quad ("m","c","h","r","g") \\
+    d(b,a)=d("learning","machine") = 5 \quad\quad ("m","c","h","r","g") 
+    \end{cases}
+    \]
+    $$\boxed{d(a,b)=d(b,a)
+    }$$
+    \item \textbf{Separation}
+    Given two strings $a="hello"$ and $b="hello"$, with $(a,b) \in E^2, E={a,b,...,z}$ and $d$ the Levenshtein distance:
+    $$\boxed{d(a,b)=d(b,a)=0
+    }$$
+    \item \textbf{Triangular inequality}
+    Given three strings $a="hello"$, $b="hallo"$ and $c="hola$, with $(a,b,c) \in E^3, E={a,b,...,z}$ and $d$ the Levenshtein distance:
+    \[
+    \begin{cases}
+    d(a,c)=d("hello","hola") = 3 \quad\quad ("e","l","a") \\
+    d(a,b) + d(b,c) = 1+3=4 \\
+    \end{cases}
+    \]
+    $$\boxed{d(a,c) \ngtr d(a,b)+d(b,c)}$$
+\end{itemize}
+\textbf{CONCLUSION}: \textbf{Reasoning by the \textit{absurd}}, we clearly observe that all of the three criterias for NOT being a general distance are countered by the Levenshtein distance, hence we can say that the Levenshtein distance is a \textit{\textbf{general distance}}.
+
+\begin{equation} \label{eq4}
+\boxed{
+Levenshtein \quad distance = 
+\begin{cases}
+\forall (a,b) \in E^2, d(a,b) \eq d(b,a) \\
+\forall (a,b) \in E^2, d(a,b) = 0 \equiv  a=b \\
+\forall (a,b,c), (d(a,c) \leq d(a,b) + d(b,c)
+\end{cases}
+}
+\end{equation}
+\subsection{Single-linkage criterion}
+ Given two clusters $C_1$ and $C_2$, with $C_1 = (x,y), C_2=(x,z) \quad \forall (x,y) \in E^2, E \subset \mathbb{R}$ and $\mathbf{D}(C_1,C_2) = \underset{\mathbf{x}_1 \in C_1,\mathbf{x}_2 \in C_2,}\min d(x_1,x_2)$ being the \textit{\textbf{single-linkage}} criterion
+\begin{itemize}
+    \item\textit{ Is the Symmetry criterion respected ?}
+    \newline $\mathbf{D}(C_1,C_2) = \underset{\mathbf{x}_1 \in C_1,\mathbf{x}_2 \in C_2,}\min d(x_1,x_2) =  0$ but $x_1 \neq x_2$
+\end{itemize}
+\textbf{CONCLUSION}: Using a counter example, we proved that the single-linkage criterion \textbf{isn't} a \textit{general} distance.
+\end{document}
